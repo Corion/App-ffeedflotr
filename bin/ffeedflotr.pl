@@ -22,6 +22,13 @@ ffeedflotr.pl - like feedGnuplot , except using Firefox+flot for display
   perl -wle "$|++;while(1){print( $i++,' ',rand(10));sleep 1}" \
   | perl -w bin\ffeedflotr.pl --title test --stream --xlen 15
 
+  # Plot multiple sets
+  perl -w bin\ffeedflotr.pl --title test
+  1 1   1
+  2 4  10
+  3 9  11
+  4 16 100
+
 =cut
 
 GetOptions(
