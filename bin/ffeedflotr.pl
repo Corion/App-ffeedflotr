@@ -3,6 +3,27 @@ use strict;
 use WWW::Mechanize::Firefox;
 use Getopt::Long;
 use Data::Dumper;
+
+=head1 NAME
+
+ffeedflotr.pl - like feedGnuplot , except using Firefox+flot for display
+
+=head1 SYNOPSIS
+
+  # Simple plot
+  perl -w bin\ffeedflotr.pl --title test
+  1 1
+  2 4
+  3 9
+  4 16
+  ^D
+
+  # Realtime streaming of data
+  perl -wle "$|++;while(1){print( $i++,' ',rand(10));sleep 1}" \
+  | perl -w bin\ffeedflotr.pl --title test --stream --xlen 15
+
+=cut
+
 GetOptions(
     'tab:s'     => \my $tab,
     'mozrepl:s' => \my $mozrepl,
@@ -20,7 +41,7 @@ my $mech = WWW::Mechanize::Firefox->new(
     create => 1,
     tab    => $tab,
     activate => 1,
-    autoclose => (!$stream),
+    autoclose => ($stream),
 );
 
 my $c = do { open my $fh, '<', "template/ffeedflotr.htm" or die "$!"; binmode $fh; local $/; <$fh> };
@@ -80,3 +101,35 @@ DO_PLOT: {
 END {
     undef $mech; # so the autoclose gets a chance to do its thing?!
 };
+
+=head1 SEE ALSO
+
+=over 4
+
+=item *
+
+L<http://search.cpan.org/dist/feedGnuplot> - a similar program for Gnuplot
+
+=head1 REPOSITORY
+
+The public repository of this module is 
+L<http://github.com/Corion/App-ffeedflotr>.
+
+=head1 SUPPORT
+
+The public support forum of this module is
+L<http://perlmonks.org/>.
+
+=head1 AUTHOR
+
+Max Maischein C<corion@cpan.org>
+
+=head1 COPYRIGHT (c)
+
+Copyright 2011 by Max Maischein C<corion@cpan.org>.
+
+=head1 LICENSE
+
+This module/program is released under the same terms as Perl itself.
+
+=cut
