@@ -44,8 +44,9 @@ my $mech = WWW::Mechanize::Firefox->new(
     autoclose => ($stream),
 );
 
-my $c = do { open my $fh, '<', "template/ffeedflotr.htm" or die "$!"; binmode $fh; local $/; <$fh> };
-
+# XXX Find out why Firefox does not like Javascript in data: URLs
+#     and what we can do about it (tempfile?)
+#my $c = do { open my $fh, '<', "template/ffeedflotr.htm" or die "$!"; binmode $fh; local $/; <$fh> };
 #$mech->update_html($c);
 $mech->get_local('../template/ffeedflotr.htm');
 
@@ -66,6 +67,7 @@ sub plot {
 # line by line
 
 # XXX We should presize the graph to $xlen if it is greater 0
+# XXX Support timelines and time events
 
 my @data;
 
