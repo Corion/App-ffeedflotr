@@ -83,13 +83,20 @@ DO_PLOT: {
     if ($xlen and @data > $xlen) {
         splice @data, 0, 0+@data-$xlen;
     };
+    
+    my @sets;
+    for my $col (1..$#{$data[0]} ) {
+        push @sets, [ map { [$_->[0], $_->[$col]] } @data ];
+    };
 
-    my $data = [{
-                  "stack" => 1, # for later, when we support stacking data
-                  "data"  => \@data,
+    my $idx = 1;
+    my $data = [
+        map +{
+                  "stack" => $idx++, # for later, when we support stacking data
+                  "data"  => $_,
                   "label" => $xaxis_label,
-                  "id"    => 1, # for later, when we support multiple datasets
-    }];
+                  "id"    => $idx, # for later, when we support multiple datasets
+    }, @sets];
     plot($data);
 
     if ($stream) {
