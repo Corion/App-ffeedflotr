@@ -32,6 +32,7 @@ GetOptions(
     'ylabel:s'   => \my $yaxis_label,
     'xlen:s'    => \my $xlen,
     'title|t:s' => \my $title,
+    'fill'      => \my $fill,
 );
 $tab = $tab ? qr/$tab/ : undef;
 
@@ -50,8 +51,6 @@ my $mech = WWW::Mechanize::Firefox->new(
 #$mech->update_html($c);
 $mech->get_local('../template/ffeedflotr.htm');
 
-#my ($plotData,$type) = $mech->eval_in_page('plotData');
-
 $mech->document->{title} = $title;
 
 my ($setupPlot, $type) = $mech->eval_in_page("setupPlot");
@@ -60,6 +59,9 @@ sub plot {
     my ($data) = @_;
     $setupPlot->($data);
 };
+
+my ($plotConfig), $type = $mech->eval_in_page("plotConfig");
+$plotConfig->{lines}->{fill} = $fill;
 
 # First, assume simple single series, [x,y] pairs
 # For real streaming, using AnyEvent might be nice
