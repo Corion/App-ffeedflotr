@@ -71,13 +71,15 @@ sub plot {
     $setupPlot->($data);
 };
 
+(my $xaxis, $type) = $mech->eval_in_page("plotConfig.xaxis");
+(my $lines, $type) = $mech->eval_in_page("plotConfig.lines");
+
+$lines->{fill} = $fill;
+
 if ($time) {
-    print for keys %$plotConfig;
-    $plotConfig->{xaxis}->{mode} = "time";
-    $plotConfig->{xaxis}->{timeformat} = $time;
+    $xaxis->{mode} = "time";
+    $xaxis->{timeformat} = $timeformat;
 };
-my ($plotConfig), $type = $mech->eval_in_page("plotConfig");
-$plotConfig->{lines}->{fill} = $fill;
 
 # First, assume simple single series, [x,y] pairs
 # For real streaming, using AnyEvent might be nice
