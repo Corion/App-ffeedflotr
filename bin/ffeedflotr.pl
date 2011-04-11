@@ -133,7 +133,7 @@ DO_PLOT: {
         map +{
                   "stack" => $idx++, # for later, when we support stacking data
                   "data"  => $_,
-                  "label" => $xaxis_label,
+                  "label" => $xaxis_label, # XXX This needs to become multiple labels
                   "id"    => $idx, # for later, when we support multiple datasets
     }, @sets];
     plot($data);
