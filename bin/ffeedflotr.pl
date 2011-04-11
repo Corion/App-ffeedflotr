@@ -43,6 +43,7 @@ GetOptions(
     'fill'      => \my $fill,
     'time'      => \my $time,
     'timeformat:s' => \my $timeformat,
+    'output|o:s' => \my $outfile,
 );
 $tab = $tab ? qr/$tab/ : undef;
 
@@ -53,7 +54,7 @@ my $mech = WWW::Mechanize::Firefox->new(
     create => 1,
     tab    => $tab,
     activate => 1,
-    autoclose => ($stream),
+    autoclose => ($stream or $outfile),
 );
 
 # XXX Find out why Firefox does not like Javascript in data: URLs
@@ -142,6 +143,15 @@ DO_PLOT: {
         sleep 1;
         redo DO_PLOT;
     };
+};
+
+if ($outfile) {
+    my $png = $mech->content_as_png($mech->tab,{left=>0,top=>0,width=>900,height=>330});
+
+    open my $out, '>', $outfile
+        or die "Couldn't create '$outfile': $!";
+    binmode $out;
+    print {$out} $png;
 };
 
 END {
