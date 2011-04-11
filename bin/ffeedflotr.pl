@@ -30,6 +30,54 @@ ffeedflotr.pl - like feedGnuplot , except using Firefox+flot for display
   3 9  11
   4 16 100
 
+=head1 OPTIONS
+
+=over 4
+
+=item *
+
+C<<--stream>> - stream data from stdin, repaint every second
+
+=item *
+
+C<<--xlen>> - number of items to keep while streaming
+
+=item *
+
+C<<--xlabel>> - label for the X-axis
+
+=item *
+
+C<<--ylabel>> - label for the Y-axis
+
+=item *
+
+C<<--fill>> - fill the area under the graph
+
+=item *
+
+C<<--time>> - X-axis is a time series
+
+=item *
+
+C<<--timeformat>> - format for the time
+
+Default is C<%y-%0m-%0d>
+
+=item *
+
+C<<--output>> - name of the output file
+
+=item *
+
+C<<--tab>> - the (regex for) the tab to reuse
+
+=item *
+
+C<<--mozrepl>> - mozrepl connection string
+
+=back
+
 =cut
 
 GetOptions(
@@ -130,7 +178,7 @@ DO_PLOT: {
     };
 
     my $idx = 1;
-    my $data = [
+    my $data = ["
         map +{
                   "stack" => $idx++, # for later, when we support stacking data
                   "data"  => $_,
