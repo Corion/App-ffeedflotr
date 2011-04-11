@@ -2,6 +2,7 @@
 use strict;
 use WWW::Mechanize::Firefox;
 use Getopt::Long;
+use Time::Local;
 use Data::Dumper;
 
 =head1 NAME
@@ -40,9 +41,12 @@ GetOptions(
     'xlen:s'    => \my $xlen,
     'title|t:s' => \my $title,
     'fill'      => \my $fill,
+    'time'      => \my $time,
+    'timeformat:s' => \my $timeformat,
 );
 $tab = $tab ? qr/$tab/ : undef;
 
+$timeformat ||= '%y-%0m-%0d';
 $title ||= 'App::ffeedflotr plot';
 
 my $mech = WWW::Mechanize::Firefox->new(
@@ -67,8 +71,15 @@ sub plot {
     $setupPlot->($data);
 };
 
-my ($plotConfig), $type = $mech->eval_in_page("plotConfig");
-$plotConfig->{lines}->{fill} = $fill;
+(my $xaxis, $type) = $mech->eval_in_page("plotConfig.xaxis");
+(my $lines, $type) = $mech->eval_in_page("plotConfig.lines");
+
+$lines->{fill} = $fill;
+
+if ($time) {
+    $xaxis->{mode} = "time";
+    $xaxis->{timeformat} = $timeformat;
+};
 
 # First, assume simple single series, [x,y] pairs
 # For real streaming, using AnyEvent might be nice
@@ -77,6 +88,22 @@ $plotConfig->{lines}->{fill} = $fill;
 
 # XXX We should presize the graph to $xlen if it is greater 0
 # XXX Support timelines and time events
+
+sub ts($) {
+    # Convert something that vaguely looks like a date/time to a JS timestamp
+    local $_ = $_[0];
+    if (/^(\d\d\d\d)-?(\d\d)-?(\d\d)$/) { # yyyy-mm-dd, canonicalize
+        $_ = "$1-$2-$3";
+    } elsif (/^(\d\d\d\d)-?([01]\d)$/) { # yyyy-mm, map to first of month
+        $_ = "$1-$2-01";
+    };
+    if (/^(\d\d\d\d)-?([01]\d)-?([0123]\d)$/) { # yyyy-mm-dd, map to 00:00:00
+        $_ = "$_ 00:00:00";
+    };
+    my @d = reverse /(\d+)/g;
+    $d[-2]--; # adjust January=0 in unix time* APIs
+    timelocal(@d)*1000;
+};
 
 my @data;
 
@@ -95,9 +122,10 @@ DO_PLOT: {
         splice @data, 0, 0+@data-$xlen;
     };
     
+    # Split up multiple columns (x,y1,y2,y3) into (x,y1),(x,y2),...
     my @sets;
     for my $col (1..$#{$data[0]} ) {
-        push @sets, [ map { [$_->[0], $_->[$col]] } @data ];
+        push @sets, [ map { [ $time ? ts $_->[0] : 0+$_->[0], 0+$_->[$col]] } @data ];
     };
 
     my $idx = 1;
@@ -105,7 +133,7 @@ DO_PLOT: {
         map +{
                   "stack" => $idx++, # for later, when we support stacking data
                   "data"  => $_,
-                  "label" => $xaxis_label,
+                  "label" => $xaxis_label, # XXX This needs to become multiple labels
                   "id"    => $idx, # for later, when we support multiple datasets
     }, @sets];
     plot($data);
