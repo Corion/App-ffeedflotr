@@ -87,7 +87,7 @@ DO_PLOT: {
         push @data, [split /\s+/, scalar <>];
     } else {
         # Read everything and plot it
-        @data = map { [split /\s+/] } <>;
+        @data = map { s/^\s+//; [ split /\s+/] } <>;
     };
     
     # Keep only the latest elements
