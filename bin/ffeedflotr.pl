@@ -4,6 +4,9 @@ use WWW::Mechanize::Firefox;
 use Getopt::Long;
 use Time::Local;
 use Data::Dumper;
+use vars qw($VERSION);
+
+$VERSION = '0.01';
 
 =head1 NAME
 
