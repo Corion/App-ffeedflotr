@@ -1,17 +1,14 @@
 <html>
 <head>
 <title>ffeedflotr plot</title>
-    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>
-    <script type="text/javascript" src="http://people.iola.dk/olau/flot/jquery.flot.js"></script>
-    <script type="text/javascript" src="http://people.iola.dk/olau/flot/jquery.flot.stack.js"></script>
-    <script type="text/javascript" src="http://people.iola.dk/olau/flot/jquery.flot.fillbetween.js"></script>
-<script type="text/javascript">
-var plotData = [];
-</script>
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>
+<script type="text/javascript" src="http://people.iola.dk/olau/flot/jquery.flot.js"></script>
+<script type="text/javascript" src="http://people.iola.dk/olau/flot/jquery.flot.stack.js"></script>
+<script type="text/javascript" src="http://people.iola.dk/olau/flot/jquery.flot.fillbetween.js"></script>
 <script>
 var plotConfig = {
             xaxis: {
-              //mode: "time",
+              mode: null, // "time",
               //timeformat: "%y-%0m-%0d",
               // ticks: [1,"month"],
               // minTickSize: [1,"day"],
@@ -20,14 +17,15 @@ var plotConfig = {
               //max: data[data.length-1][0]
             },
             lines:{ 
-                fill:true,
+                // fill:true,
                 show:true,
                 lineWidth: 1,
                 steps:false
             }
 };
-</script>
-<script>
+
+// var plotData = [];
+
 function setupPlot(plotData) {
     $.plot("#plot1", plotData, plotConfig);
 };
