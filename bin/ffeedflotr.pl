@@ -47,6 +47,22 @@ C<<--xlen>> - number of items to keep while streaming
 
 =item *
 
+C<<--legend>> - legend for data column
+
+Use like this:
+
+    --legend 1=Pass --legend 2=Fail
+
+C<<--color>> - color for data column
+
+The color can be any (HTML) color name or a number.
+
+Use like this:
+
+    --color 1=green --legend 2=red
+
+=item *
+
 C<<--xlabel>> - label for the X-axis
 
 =item *
@@ -97,6 +113,7 @@ GetOptions(
     'output|o:s' => \my $outfile,
     'sep:s' => \my $separator,
     'legend:s' => \my @legend,
+    'color:s' => \my @color,
 );
 $tab = $tab ? qr/$tab/ : undef;
 $separator ||= qr/\s+/;
@@ -104,10 +121,20 @@ if (! ref $separator) {
     $separator = qr/$separator/
 };
 
-my %legend = map {
-    /(.*?)=(.*)/;
-    $1 => $2
-} @legend;
+my @colinfo;
+
+for (@legend) {
+    /(.*?)=(.*)/
+        or warn "Ignoring malformed legend [$_]", next;
+    $colinfo[ $1 ] ||= {};
+    $colinfo[ $1 ]->{label} = $2;
+};
+for (@color) {
+    /(.*?)=(.*)/
+        or warn "Ignoring malformed color [$_]", next;
+    $colinfo[ $1 ] ||= {};
+    $colinfo[ $1 ]->{color} = $2;
+};
 
 $timeformat ||= '%y-%0m-%0d';
 $title ||= 'App::ffeedflotr plot';
@@ -202,8 +229,10 @@ DO_PLOT: {
         map { $idx++; +{
                   #"stack" => $idx, # for later, when we support stacking data
                   "data"  => $_,
-                  "label" => $legend{$idx},
+                  #"label" => $legend{$idx},
                   "id"    => $idx, # for later, when we support multiple datasets
+                  # Other, user-specified data
+                  %{ $colinfo[ $idx ] || {} },
     }} @sets];
     plot($data);
 
