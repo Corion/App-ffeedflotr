@@ -96,12 +96,18 @@ GetOptions(
     'timeformat:s' => \my $timeformat,
     'output|o:s' => \my $outfile,
     'sep:s' => \my $separator,
+    'legend:s' => \my @legend,
 );
 $tab = $tab ? qr/$tab/ : undef;
 $separator ||= qr/\s+/;
 if (! ref $separator) {
     $separator = qr/$separator/
 };
+
+my %legend = map {
+    /(.*?)=(.*)/;
+    $1 => $2
+} @legend;
 
 $timeformat ||= '%y-%0m-%0d';
 $title ||= 'App::ffeedflotr plot';
@@ -191,14 +197,14 @@ DO_PLOT: {
         push @sets, [ map { [ $time ? ts $_->[0] : 0+$_->[0], 0+$_->[$col]] } @data ];
     };
 
-    my $idx = 1;
+    my $idx = 0;
     my $data = [
-        map +{
-                  "stack" => $idx++, # for later, when we support stacking data
+        map { $idx++; +{
+                  #"stack" => $idx, # for later, when we support stacking data
                   "data"  => $_,
-                  "label" => $xaxis_label, # XXX This needs to become multiple labels
+                  "label" => $legend{$idx},
                   "id"    => $idx, # for later, when we support multiple datasets
-    }, @sets];
+    }} @sets];
     plot($data);
 
     if ($stream) {
