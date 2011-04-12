@@ -4,6 +4,9 @@ use WWW::Mechanize::Firefox;
 use Getopt::Long;
 use Time::Local;
 use Data::Dumper;
+use vars qw($VERSION);
+
+$VERSION = '0.01';
 
 =head1 NAME
 
@@ -30,6 +33,54 @@ ffeedflotr.pl - like feedGnuplot , except using Firefox+flot for display
   3 9  11
   4 16 100
 
+=head1 OPTIONS
+
+=over 4
+
+=item *
+
+C<<--stream>> - stream data from stdin, repaint every second
+
+=item *
+
+C<<--xlen>> - number of items to keep while streaming
+
+=item *
+
+C<<--xlabel>> - label for the X-axis
+
+=item *
+
+C<<--ylabel>> - label for the Y-axis
+
+=item *
+
+C<<--fill>> - fill the area under the graph
+
+=item *
+
+C<<--time>> - X-axis is a time series
+
+=item *
+
+C<<--timeformat>> - format for the time
+
+Default is C<%y-%0m-%0d>
+
+=item *
+
+C<<--output>> - name of the output file
+
+=item *
+
+C<<--tab>> - the (regex for) the tab to reuse
+
+=item *
+
+C<<--mozrepl>> - mozrepl connection string
+
+=back
+
 =cut
 
 GetOptions(
@@ -43,8 +94,14 @@ GetOptions(
     'fill'      => \my $fill,
     'time'      => \my $time,
     'timeformat:s' => \my $timeformat,
+    'output|o:s' => \my $outfile,
+    'sep:s' => \my $separator,
 );
 $tab = $tab ? qr/$tab/ : undef;
+$separator ||= qr/\s+/;
+if (! ref $separator) {
+    $separator = qr/$separator/
+};
 
 $timeformat ||= '%y-%0m-%0d';
 $title ||= 'App::ffeedflotr plot';
@@ -53,7 +110,7 @@ my $mech = WWW::Mechanize::Firefox->new(
     create => 1,
     tab    => $tab,
     activate => 1,
-    autoclose => ($stream),
+    autoclose => ($stream or $outfile),
 );
 
 # XXX Find out why Firefox does not like Javascript in data: URLs
@@ -107,14 +164,20 @@ sub ts($) {
 
 my @data;
 
+sub parse_row($) {
+    local $_ = $_[0];
+    s/^\s+//;
+    [ map {s/^\s+//; $_ } split /$separator/ ]
+};
+
 DO_PLOT: {
     if ($stream) {
         # On Windows, we can't easily select() on an FH ...
         # So we just read one line and replot
-        push @data, [split /\s+/, scalar <>];
+        push @data, parse_row scalar <>;
     } else {
         # Read everything and plot it
-        @data = map { s/^\s+//; [ split /\s+/] } <>;
+        @data = map { parse_row $_ } <>;
     };
     
     # Keep only the latest elements
@@ -142,6 +205,15 @@ DO_PLOT: {
         sleep 1;
         redo DO_PLOT;
     };
+};
+
+if ($outfile) {
+    my $png = $mech->content_as_png($mech->tab,{left=>0,top=>0,width=>900,height=>330});
+
+    open my $out, '>', $outfile
+        or die "Couldn't create '$outfile': $!";
+    binmode $out;
+    print {$out} $png;
 };
 
 END {
