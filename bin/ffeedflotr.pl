@@ -47,6 +47,22 @@ C<<--xlen>> - number of items to keep while streaming
 
 =item *
 
+C<<--legend>> - legend for data column
+
+Use like this:
+
+    --legend 1=Pass --legend 2=Fail
+
+C<<--color>> - color for data column
+
+The color can be any (HTML) color name or a number.
+
+Use like this:
+
+    --color 1=green --legend 2=red
+
+=item *
+
 C<<--xlabel>> - label for the X-axis
 
 =item *
@@ -96,11 +112,28 @@ GetOptions(
     'timeformat:s' => \my $timeformat,
     'output|o:s' => \my $outfile,
     'sep:s' => \my $separator,
+    'legend:s' => \my @legend,
+    'color:s' => \my @color,
 );
 $tab = $tab ? qr/$tab/ : undef;
 $separator ||= qr/\s+/;
 if (! ref $separator) {
     $separator = qr/$separator/
+};
+
+my @colinfo;
+
+for (@legend) {
+    /(.*?)=(.*)/
+        or warn "Ignoring malformed legend [$_]", next;
+    $colinfo[ $1 ] ||= {};
+    $colinfo[ $1 ]->{label} = $2;
+};
+for (@color) {
+    /(.*?)=(.*)/
+        or warn "Ignoring malformed color [$_]", next;
+    $colinfo[ $1 ] ||= {};
+    $colinfo[ $1 ]->{color} = $2;
 };
 
 $timeformat ||= '%y-%0m-%0d';
@@ -191,14 +224,16 @@ DO_PLOT: {
         push @sets, [ map { [ $time ? ts $_->[0] : 0+$_->[0], 0+$_->[$col]] } @data ];
     };
 
-    my $idx = 1;
+    my $idx = 0;
     my $data = [
-        map +{
-                  "stack" => $idx++, # for later, when we support stacking data
+        map { $idx++; +{
+                  #"stack" => $idx, # for later, when we support stacking data
                   "data"  => $_,
-                  "label" => $xaxis_label, # XXX This needs to become multiple labels
+                  #"label" => $legend{$idx},
                   "id"    => $idx, # for later, when we support multiple datasets
-    }, @sets];
+                  # Other, user-specified data
+                  %{ $colinfo[ $idx ] || {} },
+    }} @sets];
     plot($data);
 
     if ($stream) {
