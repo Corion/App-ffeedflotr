@@ -95,8 +95,13 @@ GetOptions(
     'time'      => \my $time,
     'timeformat:s' => \my $timeformat,
     'output|o:s' => \my $outfile,
+    'sep:s' => \my $separator,
 );
 $tab = $tab ? qr/$tab/ : undef;
+$separator ||= qr/\s+/;
+if (! ref $separator) {
+    $separator = qr/$separator/
+};
 
 $timeformat ||= '%y-%0m-%0d';
 $title ||= 'App::ffeedflotr plot';
@@ -159,14 +164,20 @@ sub ts($) {
 
 my @data;
 
+sub parse_row($) {
+    local $_ = $_[0];
+    s/^\s+//;
+    [ map {s/^\s+//; $_ } split /$separator/ ]
+};
+
 DO_PLOT: {
     if ($stream) {
         # On Windows, we can't easily select() on an FH ...
         # So we just read one line and replot
-        push @data, [split /\s+/, scalar <>];
+        push @data, parse_row scalar <>;
     } else {
         # Read everything and plot it
-        @data = map { s/^\s+//; [ split /\s+/] } <>;
+        @data = map { parse_row $_ } <>;
     };
     
     # Keep only the latest elements
