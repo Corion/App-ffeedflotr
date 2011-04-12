@@ -230,6 +230,7 @@ DO_PLOT: {
                   #"stack" => $idx, # for later, when we support stacking data
                   "data"  => $_,
                   #"label" => $legend{$idx},
+                  hoverable => 1,
                   "id"    => $idx, # for later, when we support multiple datasets
                   # Other, user-specified data
                   %{ $colinfo[ $idx ] || {} },
