@@ -12,3 +12,4 @@ perl -w bin\ffeedflotr.pl t\stats1.txt --time --sep=, --fill -o images\multi-plo
 perl -w bin\ffeedflotr.pl t\stats1.txt --time --sep=, --xlen 48 --fill -o images\multi-plot-CPAN-Testers-time-short.png
 
 perl -w bin\ffeedflotr.pl t\stats1.txt --time --sep=, --xlen 48 --fill --legend 1=Uploads --legend 2=Reports --legend 3=Pass --legend 4=Fail -o images\multi-plot-CPAN-Testers-time-legend.png
+perl -w bin\ffeedflotr.pl t\stats1.txt --time --sep=, --xlen 48 --fill --legend 1=Uploads --legend 2=Reports --legend 3=Pass --legend 4=Fail --color 3=green --color 4=red -o images\multi-plot-CPAN-Testers-color.png
