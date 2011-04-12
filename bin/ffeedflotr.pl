@@ -181,7 +181,7 @@ DO_PLOT: {
     };
 
     my $idx = 1;
-    my $data = ["
+    my $data = [
         map +{
                   "stack" => $idx++, # for later, when we support stacking data
                   "data"  => $_,
