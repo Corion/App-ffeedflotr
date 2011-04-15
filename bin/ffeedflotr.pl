@@ -114,6 +114,8 @@ GetOptions(
     'sep:s' => \my $separator,
     'legend:s' => \my @legend,
     'color:s' => \my @color,
+    'width:s' => \my $width,
+    'height:s' => \my $height,
 );
 $tab = $tab ? qr/$tab/ : undef;
 $separator ||= qr/\s+/;
@@ -136,6 +138,14 @@ for (@color) {
     $colinfo[ $1 ]->{color} = $2;
 };
 
+# Transform to px if nothing else was specified
+for ($width, $height) {
+    $_ = "${_}px"
+        if /^\d+$/;
+};
+$width ||= "100%";
+$height ||= "100%";
+
 $timeformat ||= '%y-%0m-%0d';
 $title ||= 'App::ffeedflotr plot';
 
@@ -152,6 +162,12 @@ my $mech = WWW::Mechanize::Firefox->new(
 #$mech->update_html($c);
 $mech->get_local('../template/ffeedflotr.htm');
 
+# Now, resize the container in our template
+my $container = $mech->by_id('plot1', single => 1);
+$container->{style}->{width} = $width;
+$container->{style}->{height} = $height;
+
+# Set the page title
 $mech->document->{title} = $title;
 
 my ($setupPlot, $type) = $mech->eval_in_page("setupPlot");
@@ -230,6 +246,7 @@ DO_PLOT: {
                   #"stack" => $idx, # for later, when we support stacking data
                   "data"  => $_,
                   #"label" => $legend{$idx},
+                  hoverable => 1,
                   "id"    => $idx, # for later, when we support multiple datasets
                   # Other, user-specified data
                   %{ $colinfo[ $idx ] || {} },
