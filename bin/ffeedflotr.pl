@@ -139,12 +139,12 @@ for (@color) {
 };
 
 # Transform to px if nothing else was specified
+$width ||= "100%";
+$height ||= "100%";
 for ($width, $height) {
     $_ = "${_}px"
         if /^\d+$/;
 };
-$width ||= "100%";
-$height ||= "100%";
 
 $timeformat ||= '%y-%0m-%0d';
 $title ||= 'App::ffeedflotr plot';
