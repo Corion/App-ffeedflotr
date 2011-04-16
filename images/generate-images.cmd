@@ -16,4 +16,4 @@ perl -w bin\ffeedflotr.pl t\stats1.txt --width 870 --height 320 --time --sep=, -
 
 perl -w bin\ffeedflotr.pl t\pie.txt --width 870 --height 320 --sep=, --type=pie --legend 1=Pass --color 1=green --legend 2=Fail --color 2=red --legend 3=Other -o images\CPAN-Testers-pie.png
 
-perl -w bin\ffeedflotr.pl t\pacman.txt --width 870 --height 320 --sep=, --type=pie --legend "1=% of Pie charts that look like Pacman" --color 1=yellow  --legend "2=% of Pie charts that don't look like Pacman" --color 2=blue --legend 3=Other -o images\Pacman-pie.png
+perl -w bin\ffeedflotr.pl t\pacman.txt --width 870 --height 320 --sep=, --type=pie --legend "1=%% of Pie charts that look like Pacman" --color 1=yellow  --legend "2=%% of Pie charts that don't look like Pacman" --color 2=blue --legend 3=Other --pie-start-angle 0.25 -o images\Pacman-pie.png
