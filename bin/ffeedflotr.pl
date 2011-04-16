@@ -119,7 +119,7 @@ GetOptions(
     'xlen:s'    => \my $xlen,
     'title|t:s' => \my $title,
     'type:s' => \my $chart_type,
-    'pie-start-angle:s' => \my $start_angle,
+    'pie-start-angle:s' => \my $pie_start_angle,
     'fill'      => \my $fill,
     'time'      => \my $time,
     'timeformat:s' => \my $timeformat,
