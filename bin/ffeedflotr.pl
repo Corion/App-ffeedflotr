@@ -119,6 +119,7 @@ GetOptions(
     'xlen:s'    => \my $xlen,
     'title|t:s' => \my $title,
     'type:s' => \my $chart_type,
+    'pie-start-angle:s' => \my $start_angle,
     'fill'      => \my $fill,
     'time'      => \my $time,
     'timeformat:s' => \my $timeformat,
@@ -196,6 +197,7 @@ sub plot {
 
 if ($chart_type eq 'pie') {
     $series->{pie}->{show} = 1;
+    $series->{pie}->{startAngle} = $pie_start_angle;
 };
 
 $lines->{fill} = $fill;
