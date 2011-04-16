@@ -47,6 +47,17 @@ C<<--xlen>> - number of items to keep while streaming
 
 =item *
 
+C<<--type>> - select type of chart
+
+C<< line >> - a chart with lines, the default
+
+C<< pie >> - a pie chart. Flot will use the first row in the dataset.
+You can use C<<--xlen>> to discard leading rows from the set.
+
+C<< bar >> - a bar chart. Not implemented
+
+=item *
+
 C<<--legend>> - legend for data column
 
 Use like this:
@@ -107,6 +118,7 @@ GetOptions(
     'ylabel:s'   => \my $yaxis_label,
     'xlen:s'    => \my $xlen,
     'title|t:s' => \my $title,
+    'type:s' => \my $chart_type,
     'fill'      => \my $fill,
     'time'      => \my $time,
     'timeformat:s' => \my $timeformat,
@@ -122,6 +134,7 @@ $separator ||= qr/\s+/;
 if (! ref $separator) {
     $separator = qr/$separator/
 };
+$chart_type ||= 'line';
 
 my @colinfo;
 
@@ -179,6 +192,11 @@ sub plot {
 
 (my $xaxis, $type) = $mech->eval_in_page("plotConfig.xaxis");
 (my $lines, $type) = $mech->eval_in_page("plotConfig.lines");
+(my $series, $type) = $mech->eval_in_page("plotConfig.series");
+
+if ($chart_type eq 'pie') {
+    $series->{pie}->{show} = 1;
+};
 
 $lines->{fill} = $fill;
 
