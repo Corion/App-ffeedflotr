@@ -14,4 +14,4 @@ perl -w bin\ffeedflotr.pl t\stats1.txt --width 870 --height 320 --time --sep=, -
 perl -w bin\ffeedflotr.pl t\stats1.txt  --width 870 --height 320 --time --sep=, --xlen 48 --fill --legend 1=Uploads --legend 2=Reports --legend 3=Pass --legend 4=Fail -o images\multi-plot-CPAN-Testers-time-legend.png
 perl -w bin\ffeedflotr.pl t\stats1.txt --width 870 --height 320 --time --sep=, --xlen 48 --fill --legend 1=Uploads --legend 2=Reports --legend 3=Pass --legend 4=Fail --color 3=green --color 4=red -o images\multi-plot-CPAN-Testers-color.png
 
-perl -w bin\ffeedflotr.pl t\stats1.txt --width 870 --height 320 --time --sep=, --xlen 1 --fill --legend 1=Uploads --legend 2=Reports --legend 3=Pass --legend 4=Fail --color 3=green --color 4=red -o images\CPAN-Testers-pie.png
+perl -w bin\ffeedflotr.pl t\pie.txt --width 870 --height 320 --sep=, --type=pie --legend 1=Pass --color 1=green --legend 2=Fail --color 2=red --legend 3=Other -o images\CPAN-Testers-pie.png
