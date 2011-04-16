@@ -5,6 +5,7 @@
 <script type="text/javascript" src="http://people.iola.dk/olau/flot/jquery.flot.js"></script>
 <script type="text/javascript" src="http://people.iola.dk/olau/flot/jquery.flot.stack.js"></script>
 <script type="text/javascript" src="http://people.iola.dk/olau/flot/jquery.flot.fillbetween.js"></script>
+<script type="text/javascript" src="http://people.iola.dk/olau/flot/jquery.flot.pie.js"></script>
 <script>
 var plotConfig = {
             xaxis: {
@@ -22,10 +23,9 @@ var plotConfig = {
                 lineWidth: 1,
                 steps:false
             },
-            grid: { hoverable: true, clickable: true }
+            grid: { hoverable: true, clickable: true },
+            series: { pie: { show: false }}
 };
-
-// var plotData = [];
 
 function setupPlot(plotData) {
     $.plot("#plot1", plotData, plotConfig);
