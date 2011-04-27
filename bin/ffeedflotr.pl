@@ -199,10 +199,10 @@ sub plot {
 (my $xaxis, $type) = $mech->eval_in_page("plotConfig.xaxis");
 (my $lines, $type) = $mech->eval_in_page("plotConfig.lines");
 (my $series, $type) = $mech->eval_in_page("plotConfig.series");
-(my $grid, $type) = $mech->eval_in_page("plotConfig.grid");
 
 if ($background) {
-    $grid->{backgroundImage} = $background;
+    my $plot1 = $mech->by_id('plot1', single => 1 );
+    $plot1->{style}->{backgroundImage} = "url($background)";
 };
 
 
