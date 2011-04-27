@@ -86,6 +86,10 @@ C<<--fill>> - fill the area under the graph
 
 =item *
 
+C<<--background>> - url of a background image
+
+=item *
+
 C<<--time>> - X-axis is a time series
 
 =item *
@@ -129,6 +133,7 @@ GetOptions(
     'color:s' => \my @color,
     'width:s' => \my $width,
     'height:s' => \my $height,
+    'background:s' => \my $background,
 );
 $tab = $tab ? qr/$tab/ : undef;
 $separator ||= qr/\s+/;
@@ -194,6 +199,12 @@ sub plot {
 (my $xaxis, $type) = $mech->eval_in_page("plotConfig.xaxis");
 (my $lines, $type) = $mech->eval_in_page("plotConfig.lines");
 (my $series, $type) = $mech->eval_in_page("plotConfig.series");
+(my $grid, $type) = $mech->eval_in_page("plotConfig.grid");
+
+if ($background) {
+    $grid->{backgroundImage} = $background;
+};
+
 
 if ($chart_type eq 'pie') {
     $series->{pie}->{show} = 1;
