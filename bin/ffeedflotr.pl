@@ -211,6 +211,10 @@ if ($chart_type eq 'pie') {
     $series->{pie}->{startAngle} = $pie_start_angle;
 };
 
+if ($chart_type eq 'scatter') {
+    $lines->{show} = 0;
+};
+
 $lines->{fill} = $fill;
 
 if ($time) {
