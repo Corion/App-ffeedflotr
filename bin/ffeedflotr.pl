@@ -78,7 +78,15 @@ C<<--xlabel>> - label for the X-axis
 
 =item *
 
+C<<--xmax>> - maximum size for the X-axis
+
+=item *
+
 C<<--ylabel>> - label for the Y-axis
+
+=item *
+
+C<<--ymax>> - maximum size for the Y-axis
 
 =item *
 
@@ -120,6 +128,8 @@ GetOptions(
     'stream'    => \my $stream,
     'xlabel:s'   => \my $xaxis_label,
     'ylabel:s'   => \my $yaxis_label,
+    'xmax:s'   => \my $xmax,
+    'ymax:s'   => \my $ymax,
     'xlen:s'    => \my $xlen,
     'title|t:s' => \my $title,
     'type:s' => \my $chart_type,
@@ -197,6 +207,7 @@ sub plot {
 };
 
 (my $xaxis, $type) = $mech->eval_in_page("plotConfig.xaxis");
+(my $yaxis, $type) = $mech->eval_in_page("plotConfig.yaxis");
 (my $lines, $type) = $mech->eval_in_page("plotConfig.lines");
 (my $series, $type) = $mech->eval_in_page("plotConfig.series");
 
@@ -220,6 +231,14 @@ $lines->{fill} = $fill;
 if ($time) {
     $xaxis->{mode} = "time";
     $xaxis->{timeformat} = $timeformat;
+};
+
+if ($xmax) {
+    $xaxis->{max} = $xmax;
+};
+
+if ($ymax) {
+    $yaxis->{max} = $ymax;
 };
 
 # First, assume simple single series, [x,y] pairs
@@ -295,7 +314,8 @@ DO_PLOT: {
 };
 
 if ($outfile) {
-    my $png = $mech->content_as_png($mech->tab,{left=>0,top=>0,width=>900,height=>330});
+    #my $png = $mech->content_as_png($mech->tab,{left=>0,top=>0,width=>900,height=>330});
+    my $png = $mech->element_as_png($container);
 
     open my $out, '>', $outfile
         or die "Couldn't create '$outfile': $!";
