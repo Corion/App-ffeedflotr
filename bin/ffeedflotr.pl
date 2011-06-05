@@ -335,6 +335,8 @@ END {
 
 L<http://search.cpan.org/dist/feedGnuplot> - a similar program for Gnuplot
 
+=back
+
 =head1 REPOSITORY
 
 The public repository of this module is 
