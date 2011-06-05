@@ -1,0 +1,7 @@
+NAME
+    App::Ffeedflotr - plot data in Firefox using flot
+
+SYNOPSIS
+    This module currently is just a placeholder to accompany the
+    `ffeedflotr.pl' program in this distribution.
+

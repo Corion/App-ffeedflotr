@@ -5,7 +5,7 @@ $VERSION = '0.01';
 
 =head1 NAME
 
-App::ffeedflotr - plot data in Firefox using flot
+App::Ffeedflotr - plot data in Firefox using flot
 
 =head1 SYNOPSIS
 
