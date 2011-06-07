@@ -70,7 +70,7 @@ The color can be any (HTML) color name or a number.
 
 Use like this:
 
-    --color 1=green --legend 2=red
+    --color 1=green --color 2=red
 
 =item *
 
@@ -314,7 +314,6 @@ DO_PLOT: {
 };
 
 if ($outfile) {
-    #my $png = $mech->content_as_png($mech->tab,{left=>0,top=>0,width=>900,height=>330});
     my $png = $mech->element_as_png($container);
 
     open my $out, '>', $outfile
