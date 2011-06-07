@@ -3,6 +3,7 @@ use strict;
 use WWW::Mechanize::Firefox;
 use Getopt::Long;
 use Time::Local;
+use Time::HiRes qw(sleep);
 use Data::Dumper;
 use vars qw($VERSION);
 
@@ -40,6 +41,10 @@ ffeedflotr.pl - like feedGnuplot , except using Firefox+flot for display
 =item *
 
 C<<--stream>> - stream data from stdin, repaint every second
+
+=item *
+
+C<<--update-interval>> - set minimum update interval in seconds
 
 =item *
 
@@ -144,6 +149,7 @@ GetOptions(
     'width:s' => \my $width,
     'height:s' => \my $height,
     'background:s' => \my $background,
+    'update-interval:s' => \my $sleep_interval,
 );
 $tab = $tab ? qr/$tab/ : undef;
 $separator ||= qr/\s+/;
@@ -151,6 +157,7 @@ if (! ref $separator) {
     $separator = qr/$separator/
 };
 $chart_type ||= 'line';
+$sleep_interval ||= 0.5;
 
 my @colinfo;
 
@@ -273,11 +280,37 @@ sub parse_row($) {
     [ map {s/^\s+//; $_ } split /$separator/ ]
 };
 
+my $input;
+sub read_available_input {
+    my ($pipe) = @_;
+    
+    # Just spawn a thread
+    # to asynchronously read from the filehandle
+    if (! $input) {
+        require threads;
+        require Thread::Queue;
+        $input = Thread::Queue->new();
+        threads::async(sub {
+            $input->enqueue( "$_" ) # make an explicit copy, again
+                while(<$pipe>);
+            $input->enqueue( undef );
+        })->detach;
+    };
+
+    my @res = $input->dequeue; # block for at least one item
+    # And fetch all items that are available right now
+    while ($input->pending) {
+        push @res, $input->dequeue($input->pending);
+    };
+    @res
+}
+
+my $done;
 DO_PLOT: {
     if ($stream) {
         # On Windows, we can't easily select() on an FH ...
         # So we just read one line and replot
-        push @data, parse_row scalar <>;
+        push @data, map { $done=!defined($_); defined($_) ? parse_row( $_ ) : () } read_available_input( *STDIN );
     } else {
         # Read everything and plot it
         @data = map { parse_row $_ } <>;
@@ -308,8 +341,9 @@ DO_PLOT: {
     plot($data);
 
     if ($stream) {
-        sleep 1;
-        redo DO_PLOT;
+        sleep $sleep_interval;
+        redo DO_PLOT
+            unless $done;
     };
 };
 
