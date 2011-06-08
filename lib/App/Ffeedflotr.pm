@@ -173,15 +173,15 @@ sub detect_separator {
     my ($self, %options) = @_;
     my $data = $options{ data };
     my @candidates = @{ $options{ candidates } || [qr/\t/,qr/,/,qr/;/,qr/\s+/]};
-    my $rowcount = $options{ sample };
+    my $rowcount = $options{ sample } || 10;
     
     my $separator;
     
-    my $rowcount = min( $#$data, $rowcount ); # only check the first lines
+    $rowcount = min( $#$data, $rowcount ); # only check the first lines
     CANDIDATE: for my $candidate (@candidates) {
-        my $colcount =()= $data[0] =~ /($candidate)/g;
+        my $colcount =()= $data->[0] =~ /($candidate)/g;
         if ($colcount) {
-            for (@data[ 1..$check_limit ]) {
+            for (@{$data}[ 1..$rowcount ]) {
                 my $newcount =()= /($candidate)/g;
                 next CANDIDATE
                     if ($newcount != $colcount);
