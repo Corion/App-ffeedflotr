@@ -32,6 +32,11 @@ WriteMakefile1(
     'VERSION_FROM'  => "lib/$main_module", # finds $VERSION
     'PREREQ_PM'     => {
                        'WWW::Mechanize::Firefox' => 0,
+                       'List::Util' => 0, # for min()
+                       'File::Temp' => 0, # for tempfile()
+                       'Time::Local' => 0,
+                       # threads - if you want nonblocking streaming
+                       # Thread::Queue - ditto
                       }, # e.g., Module::Name => 1.1
     ABSTRACT_FROM   => "lib/$main_module", # retrieve abstract from module
     AUTHOR          => 'Max Maischein <corion@cpan.org>',
