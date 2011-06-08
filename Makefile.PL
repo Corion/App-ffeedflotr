@@ -31,7 +31,7 @@ WriteMakefile1(
     'LICENSE'       => 'perl',
     'VERSION_FROM'  => "lib/$main_module", # finds $VERSION
     'PREREQ_PM'     => {
-                       'WWW::Mechanize::Firefox' => 0,
+                       'WWW::Mechanize::Firefox' => 0.45, # ->by_id()
                        'List::Util' => 0, # for min()
                        'File::Temp' => 0, # for tempfile()
                        'Time::Local' => 0,
