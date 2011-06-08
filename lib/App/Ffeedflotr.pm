@@ -213,6 +213,15 @@ sub plot {
     );
     @data = map { $self->parse_row( $_ ) } @data;
     
+    if ($self->{header}) {
+        my $header = shift @data;
+        for (0..$#$header) {
+            if (length $header->[$_] and !exists $self->{colinfo}->[$_]->{label}) {
+                $self->{colinfo}->[$_]->{label} = $header->[$_];
+            };
+        }
+    }
+    
     # Keep only the latest elements
     if ($self->{xlen} and @data > $self->{xlen}) {
         splice @data, 0, 0+@data-$self->{xlen};

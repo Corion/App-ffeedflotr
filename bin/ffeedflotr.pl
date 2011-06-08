@@ -110,6 +110,20 @@ Default is C<%y-%0m-%0d>
 
 =item *
 
+C<<--separator>> - specify the column separator.
+
+The default will be guessed from the set
+
+  /\t/ /,/ /;/ /\s+/
+
+=item *
+
+C<<--header>> - first line contains column headers
+
+The column headers will be used as the legend as well.
+
+=item *
+
 C<<--output>> - name of the output file
 
 =item *
@@ -141,6 +155,7 @@ GetOptions(
     'timeformat:s' => \my $timeformat,
     'output|o:s' => \my $outfile,
     'sep:s' => \my $separator,
+    'header' => \my $header,
     'legend:s' => \my @legend,
     'color:s' => \my @color,
     'width:s' => \my $width,
@@ -192,6 +207,7 @@ my $app = App::Ffeedflotr->new(
     fill => $fill,
     xmax => $xmax,
     ymax => $ymax,
+    header => $header,
 );
 
 $app->configure_plot();
