@@ -1,10 +1,7 @@
 #!perl -w
 use strict;
-use WWW::Mechanize::Firefox;
 use Getopt::Long;
-use Time::Local;
-use Time::HiRes qw(sleep);
-use Data::Dumper;
+use App::Ffeedflotr;
 use vars qw($VERSION);
 
 $VERSION = '0.01';
@@ -152,27 +149,11 @@ GetOptions(
     'update-interval:s' => \my $sleep_interval,
 );
 $tab = $tab ? qr/$tab/ : undef;
-$separator ||= qr/\s+/;
-if (! ref $separator) {
+if (defined $separator and ! ref $separator) {
     $separator = qr/$separator/
 };
 $chart_type ||= 'line';
 $sleep_interval ||= 0.5;
-
-my @colinfo;
-
-for (@legend) {
-    /(.*?)=(.*)/
-        or warn "Ignoring malformed legend [$_]", next;
-    $colinfo[ $1 ] ||= {};
-    $colinfo[ $1 ]->{label} = $2;
-};
-for (@color) {
-    /(.*?)=(.*)/
-        or warn "Ignoring malformed color [$_]", next;
-    $colinfo[ $1 ] ||= {};
-    $colinfo[ $1 ]->{color} = $2;
-};
 
 # Transform to px if nothing else was specified
 $width ||= "100%";
@@ -183,66 +164,32 @@ for ($width, $height) {
 };
 
 $timeformat ||= '%y-%0m-%0d';
-$title ||= 'App::ffeedflotr plot';
+$title ||= 'App::Ffeedflotr plot';
 
-my $mech = WWW::Mechanize::Firefox->new(
-    create => 1,
-    tab    => $tab,
-    activate => 1,
+# XXX How to inline this?
+# Read from DATA, write to tempfile
+my $template = do {
+                   open my $fh, '<', 'template/ffeedflotr.htm'
+                       or die "Couldn't read 'template/ffeedflotr.htm': $!";
+                   local $/; <$fh> };
+
+my $app = App::Ffeedflotr->new(
+    tab => $tab,
     autoclose => ($stream or $outfile),
+    title => $title,
+    timeformat => $timeformat,
+    width => $width,
+    height => $height,
+    legend => \@legend,
+    color  => \@color,
+    type => $chart_type,
+    sleep_interval => \$sleep_interval,
+    separator => $separator,
+    template => \$template,
+    type => $chart_type,
 );
 
-$mech->get_local('../template/ffeedflotr.htm');
-
-# Now, resize the container in our template
-my $container = $mech->by_id('plot1', single => 1);
-$container->{style}->{width} = $width;
-$container->{style}->{height} = $height;
-
-# Set the page title
-$mech->document->{title} = $title;
-
-my ($setupPlot, $type) = $mech->eval_in_page("setupPlot");
-
-sub plot {
-    my ($data) = @_;
-    $setupPlot->($data);
-};
-
-(my $xaxis, $type) = $mech->eval_in_page("plotConfig.xaxis");
-(my $yaxis, $type) = $mech->eval_in_page("plotConfig.yaxis");
-(my $lines, $type) = $mech->eval_in_page("plotConfig.lines");
-(my $series, $type) = $mech->eval_in_page("plotConfig.series");
-
-if ($background) {
-    my $plot1 = $mech->by_id('plot1', single => 1 );
-    $plot1->{style}->{backgroundImage} = "url($background)";
-};
-
-
-if ($chart_type eq 'pie') {
-    $series->{pie}->{show} = 1;
-    $series->{pie}->{startAngle} = $pie_start_angle;
-};
-
-if ($chart_type eq 'scatter') {
-    $lines->{show} = 0;
-};
-
-$lines->{fill} = $fill;
-
-if ($time) {
-    $xaxis->{mode} = "time";
-    $xaxis->{timeformat} = $timeformat;
-};
-
-if ($xmax) {
-    $xaxis->{max} = $xmax;
-};
-
-if ($ymax) {
-    $yaxis->{max} = $ymax;
-};
+$app->configure_plot();
 
 # First, assume simple single series, [x,y] pairs
 # For real streaming, using AnyEvent might be nice
@@ -252,89 +199,22 @@ if ($ymax) {
 # XXX We should presize the graph to $xlen if it is greater 0
 # XXX Support timelines and time events
 
-sub ts($) {
-    # Convert something that vaguely looks like a date/time to a JS timestamp
-    local $_ = $_[0];
-    if (/^(\d\d\d\d)-?(\d\d)-?(\d\d)$/) { # yyyy-mm-dd, canonicalize
-        $_ = "$1-$2-$3";
-    } elsif (/^(\d\d\d\d)-?([01]\d)$/) { # yyyy-mm, map to first of month
-        $_ = "$1-$2-01";
-    };
-    if (/^(\d\d\d\d)-?([01]\d)-?([0123]\d)$/) { # yyyy-mm-dd, map to 00:00:00
-        $_ = "$_ 00:00:00";
-    };
-    my @d = reverse /(\d+)/g;
-    $d[-2]--; # adjust January=0 in unix time* APIs
-    timelocal(@d)*1000;
-};
-
 my @data;
-
-sub parse_row($) {
-    local $_ = $_[0];
-    s/^\s+//;
-    [ map {s/^\s+//; $_ } split /$separator/ ]
-};
-
-my $input;
-sub read_available_input {
-    my ($pipe) = @_;
-    
-    # Just spawn a thread
-    # to asynchronously read from the filehandle
-    if (! $input) {
-        require threads;
-        require Thread::Queue;
-        $input = Thread::Queue->new();
-        threads::async(sub {
-            $input->enqueue( "$_" ) # make an explicit copy, again
-                while(<$pipe>);
-            $input->enqueue( undef );
-        })->detach;
-    };
-
-    my @res = $input->dequeue; # block for at least one item
-    # And fetch all items that are available right now
-    while ($input->pending) {
-        push @res, $input->dequeue($input->pending);
-    };
-    @res
-}
 
 my $done;
 DO_PLOT: {
     if ($stream) {
-        # On Windows, we can't easily select() on an FH ...
-        # So we just read one line and replot
-        push @data, map { $done=!defined($_); defined($_) ? parse_row( $_ ) : () } read_available_input( *STDIN );
+        push @data, $app->read_available_input( *STDIN );
+        if (@data and ! defined $data[-1]) {
+            $done = 1;
+            pop @data;
+        }
     } else {
         # Read everything and plot it
-        @data = map { parse_row $_ } <>;
+        @data = <>;
     };
     
-    # Keep only the latest elements
-    if ($xlen and @data > $xlen) {
-        splice @data, 0, 0+@data-$xlen;
-    };
-    
-    # Split up multiple columns (x,y1,y2,y3) into (x,y1),(x,y2),...
-    my @sets;
-    for my $col (1..$#{$data[0]} ) {
-        push @sets, [ map { [ $time ? ts $_->[0] : 0+$_->[0], 0+$_->[$col]] } @data ];
-    };
-
-    my $idx = 0;
-    my $data = [
-        map { $idx++; +{
-                  #"stack" => $idx, # for later, when we support stacking data
-                  "data"  => $_,
-                  #"label" => $legend{$idx},
-                  hoverable => 1,
-                  "id"    => $idx, # for later, when we support multiple datasets
-                  # Other, user-specified data
-                  %{ $colinfo[ $idx ] || {} },
-    }} @sets];
-    plot($data);
+    $app->plot(@data);
 
     if ($stream) {
         sleep $sleep_interval;
@@ -344,16 +224,7 @@ DO_PLOT: {
 };
 
 if ($outfile) {
-    my $png = $mech->element_as_png($container);
-
-    open my $out, '>', $outfile
-        or die "Couldn't create '$outfile': $!";
-    binmode $out;
-    print {$out} $png;
-};
-
-END {
-    undef $mech; # so the autoclose gets a chance to do its thing?!
+    $app->save_png($outfile);
 };
 
 =head1 SEE ALSO
