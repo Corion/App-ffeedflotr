@@ -181,12 +181,19 @@ for ($width, $height) {
 $timeformat ||= '%y-%0m-%0d';
 $title ||= 'App::Ffeedflotr plot';
 
-# XXX How to inline this?
-# Read from DATA, write to tempfile
 my $template = do {
-                   open my $fh, '<', 'template/ffeedflotr.htm'
-                       or die "Couldn't read 'template/ffeedflotr.htm': $!";
-                   local $/; <$fh> };
+    my $fh;
+    no warnings 'unopened';
+    if (tell DATA > -1) {
+        # read the template from the __DATA__ section
+        $fh = *DATA;
+    } else {
+        open $fh, '<', 'template/ffeedflotr.htm'
+            or die "Couldn't read 'template/ffeedflotr.htm': $!";
+    }
+    local $/;
+    <$fh>
+};
 
 my $app = App::Ffeedflotr->new(
     tab => $tab,
