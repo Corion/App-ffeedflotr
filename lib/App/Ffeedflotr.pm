@@ -39,10 +39,6 @@ sub new {
     
     my @colinfo;
     
-    #if (! exists $options{ separator }) {
-    #    $options{ separator } = qr/\s+/;
-    #}
-    
     for (@{ delete $options{ legend } || []}) {
         /(.*?)=(.*)/
             or warn "Ignoring malformed legend [$_]", next;
@@ -221,7 +217,6 @@ sub plot {
         map { $idx++; +{
                   #"stack" => $idx, # for later, when we support stacking data
                   "data"  => $_,
-                  #"label" => $legend{$idx},
                   hoverable => 1,
                   "id"    => $idx, # for later, when we support multiple datasets
                   # Other, user-specified data
