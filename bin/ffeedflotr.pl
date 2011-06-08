@@ -192,10 +192,6 @@ my $mech = WWW::Mechanize::Firefox->new(
     autoclose => ($stream or $outfile),
 );
 
-# XXX Find out why Firefox does not like Javascript in data: URLs
-#     and what we can do about it (tempfile?)
-#my $c = do { open my $fh, '<', "template/ffeedflotr.htm" or die "$!"; binmode $fh; local $/; <$fh> };
-#$mech->update_html($c);
 $mech->get_local('../template/ffeedflotr.htm');
 
 # Now, resize the container in our template
