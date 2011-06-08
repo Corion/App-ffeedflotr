@@ -238,7 +238,8 @@ DO_PLOT: {
     $app->plot(@data);
 
     if ($stream) {
-        sleep $sleep_interval;
+        require Time::HiRes;
+        Time::HiRes::sleep($sleep_interval);
         redo DO_PLOT
             unless $done;
     };

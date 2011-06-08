@@ -3,7 +3,6 @@ use strict;
 use vars qw($VERSION);
 use WWW::Mechanize::Firefox;
 use Time::Local;
-use Time::HiRes qw(sleep);
 use File::Temp qw(tempfile);
 use List::Util qw(min);
 
