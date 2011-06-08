@@ -5,7 +5,7 @@ use WWW::Mechanize::Firefox;
 use Time::Local;
 use Time::HiRes qw(sleep);
 use File::Temp qw(tempfile);
-use List::Util qw(reduce min);
+use List::Util qw(min);
 
 $VERSION = '0.01';
 
