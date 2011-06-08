@@ -72,6 +72,7 @@ sub configure_plot {
         type
         time
         timeformat
+        fill
     ));
     for (@defaults) {
         $options{ $_ } ||= $self->{ $_ };

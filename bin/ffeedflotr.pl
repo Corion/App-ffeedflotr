@@ -177,6 +177,7 @@ my $app = App::Ffeedflotr->new(
     tab => $tab,
     autoclose => ($stream or $outfile),
     title => $title,
+    'time' => $time,
     timeformat => $timeformat,
     width => $width,
     height => $height,
@@ -187,6 +188,10 @@ my $app = App::Ffeedflotr->new(
     separator => $separator,
     template => \$template,
     type => $chart_type,
+    xlen => $xlen,
+    fill => $fill,
+    xmax => $xmax,
+    ymax => $ymax,
 );
 
 $app->configure_plot();
