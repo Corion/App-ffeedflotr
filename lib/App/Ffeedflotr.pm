@@ -61,7 +61,18 @@ sub mech { $_[0]->{mech} }
 
 sub configure_plot {
     my ($self, %options) = @_;
-    my @defaults = (qw(template width height background pie_start_angle xmax ymax type));
+    my @defaults = (qw(
+        template
+        width
+        height
+        background
+        pie_start_angle
+        xmax
+        ymax
+        type
+        time
+        timeformat
+    ));
     for (@defaults) {
         $options{ $_ } ||= $self->{ $_ };
     }
