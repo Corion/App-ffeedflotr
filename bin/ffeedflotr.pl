@@ -8,12 +8,12 @@ $VERSION = '0.01';
 
 =head1 NAME
 
-ffeedflotr.pl - like feedGnuplot , except using Firefox+flot for display
+fff - like feedGnuplot , except using Firefox+flot for display
 
 =head1 SYNOPSIS
 
   # Simple plot
-  perl -w bin\ffeedflotr.pl --title test
+  fff --title test
   1 1
   2 4
   3 9
@@ -22,10 +22,10 @@ ffeedflotr.pl - like feedGnuplot , except using Firefox+flot for display
 
   # Realtime streaming of data
   perl -wle "$|++;while(1){print( $i++,' ',rand(10));sleep 1}" \
-  | perl -w bin\ffeedflotr.pl --title test --stream --xlen 15
+  | fff --title test --stream --xlen 15
 
   # Plot multiple sets
-  perl -w bin\ffeedflotr.pl --title test
+  fff --title test
   1 1   1
   2 4  10
   3 9  11
@@ -211,11 +211,6 @@ my $app = App::Ffeedflotr->new(
 );
 
 $app->configure_plot();
-
-# First, assume simple single series, [x,y] pairs
-# For real streaming, using AnyEvent might be nice
-# especially so we can read 1s worth of data instead of going
-# line by line
 
 # XXX We should presize the graph to $xlen if it is greater 0
 # XXX Support timelines and time events
