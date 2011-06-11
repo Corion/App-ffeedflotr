@@ -23,12 +23,14 @@ distribution.
 sub new {
     my ($class, %options) = @_;
     
-    my @passthrough = qw(tab autoclose);
+    my @passthrough = qw(tab);
     my %mech_opts = map { 
                         exists $options{ $_ }
                         ? ($_ => delete $options{ $_ })
                         : ()
                     } @passthrough;
+    $mech_opts{ autoclose } = 1
+        if delete $options{ autoclose };
     
     $options{ mech } = WWW::Mechanize::Firefox->new(
         create => 1,
