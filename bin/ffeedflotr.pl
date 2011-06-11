@@ -252,6 +252,8 @@ if ($outfile) {
     $app->save_png($outfile);
 };
 
+undef $app;
+
 =head1 SEE ALSO
 
 =over 4
