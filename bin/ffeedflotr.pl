@@ -214,6 +214,7 @@ my $app = App::Ffeedflotr->new(
     fill => $fill,
     xmax => $xmax,
     ymax => $ymax,
+    pie_start_angle => $pie_start_angle,
     header => $header,
 );
 
