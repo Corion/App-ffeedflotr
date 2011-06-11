@@ -146,7 +146,9 @@ sub ts($) {
         $_ = "$_ 00:00:00";
     };
     my @d = reverse /(\d+)/g;
-    $d[-2]--; # adjust January=0 in unix time* APIs
+    if (4 <= @d) { # we have a month
+        $d[4]--; # adjust January=0 in unix time* APIs
+    };
     timelocal(@d)*1000;
 };
 
